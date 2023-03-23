@@ -1,0 +1,18 @@
+{
+  "entryPoints": [
+    "./app.ts",
+    "./commands/*",
+    "./events",
+    "./helpers",
+    "./deploy-commands.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "doc/",
+  "plugin": [
+    "typedoc-theme-hierarchy"
+  ],
+  "theme": "hierarchy",
+  "excludeInternal": false,
+  "githubPages": false,
+  "name": "ungeheueres Ungeziefer",
+}
