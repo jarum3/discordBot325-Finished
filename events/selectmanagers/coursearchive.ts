@@ -20,7 +20,7 @@ module.exports = {
     if (!(interaction.customId === 'archive-course')) return;
     if (!(interaction.guild)) return;
     await interaction.deferUpdate();
-    const rolesList = getListFromFile('data/courses.json') as CourseRole[];
+    let rolesList = getListFromFile('data/courses.json') as CourseRole[];
     const rolesSelected = interaction.values;
     const archivedRoles: string[] = [];
     // Assign roles in a loop, in case we want to make this a multi-select later.
@@ -32,11 +32,6 @@ module.exports = {
         const serverRole = await interaction.guild.roles.fetch(courseRole.id);
         const serverVeteranRole = await interaction.guild.roles.fetch(veteranRole.id);
         // TODO Dropdown for confirmation
-        // TODO
-        // [X] Move course to bottom: find first course of name matching current semester, then find first course after that not matching, put this course above that.
-        // [X] Change role permissions from student to veteran
-        // [X] Transfer student roles over, loop over each student with student role for this course, remove it, add the veteran role
-        // [ ] Transfer from current courses file to previous courses file (Remove category from current course copy)
         if (course.category) {
           const category = await interaction.guild.channels.fetch(course.category.id) as CategoryChannel;
           if (category) {
@@ -87,6 +82,21 @@ module.exports = {
               }
             }
             // TODO Continue from here and move course from current file to prev semester file
+            const index = rolesList.indexOf(course);
+            rolesList = rolesList.splice(index, 1);
+            const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
+            const oldCourse = new CourseRole({
+              prefix: course.prefix,
+              number: course.number,
+              role: course.role,
+              veteranRole: course.veteranRole,
+              video: course.video,
+              jointClass: course.jointClass,
+              name: course.name,
+            });
+            prevRolesList.push(oldCourse);
+            saveListToFile(rolesList, 'data/courses.json');
+            saveListToFile(prevRolesList, 'data/prevsemester.json');
           }
         }
         else {
