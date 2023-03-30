@@ -94,6 +94,6 @@ module.exports = {
         }
       }
     }
-    await interaction.editReply({ content: 'Course removed: ' + archivedRoles.join(', '), components: [] });
+    await interaction.editReply({ content: 'Course archived: ' + archivedRoles.join(', '), components: [] });
   },
 };
