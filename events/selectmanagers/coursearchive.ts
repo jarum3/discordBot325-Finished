@@ -81,7 +81,6 @@ module.exports = {
                 student.roles.add(serverVeteranRole);
               }
             }
-            // TODO Continue from here and move course from current file to prev semester file
             const index = rolesList.indexOf(course);
             rolesList = rolesList.splice(index, 1);
             const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
