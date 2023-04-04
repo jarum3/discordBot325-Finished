@@ -11,7 +11,8 @@ module.exports = {
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction) {
     // Loop over each course in prevsemester.json, archive it, save that data to one file, then loop over each new course in courses.json
-    // Add confirmation button
+    // Then move each course over to prevsemester.json
+    // TODO Add confirmation button
     const sent = await interaction.reply({ content: 'Pinging...', fetchReply: true });
     interaction.editReply(`Pong!\nTook ${sent.createdTimestamp - interaction.createdTimestamp}ms`);
   },
