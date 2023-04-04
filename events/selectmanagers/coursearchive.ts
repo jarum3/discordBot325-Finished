@@ -28,7 +28,7 @@ module.exports = {
         const veteranRole = course.veteranRole;
         const serverRole = await interaction.guild.roles.fetch(courseRole.id);
         const serverVeteranRole = await interaction.guild.roles.fetch(veteranRole.id);
-        // TODO Dropdown for confirmation
+        // TODO Button for confirmation
         if (course.category) {
           const category = await interaction.guild.channels.fetch(course.category.id) as CategoryChannel;
           if (category) {
@@ -80,19 +80,20 @@ module.exports = {
             }
             const index = rolesList.indexOf(course);
             rolesList = rolesList.splice(index, 1);
-            const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
-            const oldCourse = new CourseRole({
-              prefix: course.prefix,
-              number: course.number,
-              role: course.role,
-              veteranRole: course.veteranRole,
-              video: course.video,
-              jointClass: course.jointClass,
-              name: course.name,
-            });
-            prevRolesList.push(oldCourse);
+            // Commented out code for saving things to previous semester file
+            // const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
+            // const oldCourse = new CourseRole({
+            //   prefix: course.prefix,
+            //   number: course.number,
+            //   role: course.role,
+            //   veteranRole: course.veteranRole,
+            //   video: course.video,
+            //   jointClass: course.jointClass,
+            //   name: course.name,
+            // });
+            // prevRolesList.push(oldCourse);
             saveListToFile(rolesList, 'data/courses.json');
-            saveListToFile(prevRolesList, 'data/prevsemester.json');
+            // saveListToFile(prevRolesList, 'data/prevsemester.json');
           }
         }
         else {
