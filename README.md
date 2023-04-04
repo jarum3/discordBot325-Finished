@@ -32,19 +32,16 @@ This source code is documented using several features specific to [Typedoc](http
 # Description of progress
 
 ## To-do
-- [x] Handle joint course adding with temporary dropdown
-- [ ] Currently, many errors are simply guarded against with return statements, but these cases should display a message to the user. These type-guards are generally at the top of files, checking that the command was executed within a guild, and valid data was provided.
-- [ ] Create functionality to create, populate, and archive categories and attach those to role objects
 - [ ] Create semester tracking system, attaching semester value to category names
-- [ ] Create list of archived courses to keep track of, separate from removing a course
 - [ ] Implement everything together with one start semester command, taking a semester's name as an argument. This should implement everything done so far for every course object, archiving old courses, creating roles if necessary. Then it should ask if the user is sure they'd like to do this, with a list of courses that will be added and a list of courses that will be archived.
-- [ ] Implement a rollback feature to undo this semester change, using data entered during the semester starting process to undo each action step by step
-- [ ] Validate file saving further to reduce concurrency conflicts
-- [ ] Optionally, implement anonymized polls and a submission box.
-- [x] Clean up edge cases for role deletions outside of bot interactions
+- [ ] Currently, many errors are simply guarded against with return statements, but these cases should display a message to the user. These type-guards are generally at the top of files, checking that the command was executed within a guild, and valid data was provided.
 
 ## Previous features
-- [x] **Lock permissions for essentially all current slash-commands behind administrative privileges**
+- [x] Create list of archived courses to keep track of, separate from removing a course
+- [x] Create functionality to create, populate, and archive categories and attach those to role objects
+- [x] Lock permissions for essentially all current slash-commands behind administrative privileges
+- [x] Clean up edge cases for role deletions outside of bot interactions
+- [x] Handle joint course adding with temporary dropdown
 - [x] Adjusting structure of roles and functions to be more practical
 - [x] Commands for adding and dropping courses and optional roles from saved lists
 - [x] Commands for generating a dropdown that both displays that list, and assigns roles to members on interactions
