@@ -6,6 +6,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, ButtonStyle } from 'd
 import { getListFromFile } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from '@discordjs/builders';
+import * as fs from 'node:fs';
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('startsemester')
@@ -22,12 +23,13 @@ module.exports = {
     const newCoursesNames: string[] = [];
     prevCourses.forEach(elem => prevCoursesNames.push(elem.name));
     newCourses.forEach(elem => newCoursesNames.push(elem.name));
+    const semesterValue = fs.readFileSync('data/semester.txt').toString();
     const embed = new EmbedBuilder()
       .setTitle('Semester Confirmation')
       .setColor(0xDD7711)
       .setDescription('Are you sure you\'d like to enact the following changes?')
-      .setAuthor({ name: '325-Bot - Semester Confirmation' })
       .addFields(
+        { name: 'New semester value', value: semesterValue },
         { name: 'Previous courses to be archived', value: '\n' + prevCoursesNames.join('\n') },
         { name: 'New courses to be created', value: '\n' + newCoursesNames.join('\n') },
       )
