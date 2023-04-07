@@ -5,7 +5,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 // Pings, returns time pinged. A template for other commands.
 module.exports = {
-  data: new SlashCommandBuilder().setName('testbutton').setDescription('Replies with Pong!'),
+  data: new SlashCommandBuilder().setName('testbutton').setDescription('Example confirmation button.'),
   async execute(interaction: ChatInputCommandInteraction) {
     const row = new ActionRowBuilder<ButtonBuilder>()
       .addComponents(
