@@ -1,9 +1,9 @@
 /**
- * TODO
+ * Command to simply accept a string and write it as the current semester value.
  * @packageDocumentation
  */
 import { SlashCommandBuilder, ChatInputCommandInteraction, SlashCommandStringOption } from 'discord.js';
-// TODO
+import * as fs from 'node:fs';
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setsemester')
@@ -15,9 +15,11 @@ module.exports = {
     .setDefaultMemberPermissions(0)
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction) {
-    // TODO
-    // Write string to currentsemester.txt
-    const sent = await interaction.reply({ content: 'Pinging...', fetchReply: true });
-    interaction.editReply(`Pong!\nTook ${sent.createdTimestamp - interaction.createdTimestamp}ms`);
+    const semester = interaction.options.getString('name');
+    if (semester !== null) {
+      fs.writeFileSync('data/currentsemester.txt', semester);
+      interaction.reply('New semester: ' + semester);
+    }
+    else interaction.reply('Sorry, that input was invalid.');
   },
 };
