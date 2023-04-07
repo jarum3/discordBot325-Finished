@@ -11,9 +11,9 @@ module.exports = {
       .addComponents(
         new ButtonBuilder()
           .setCustomId('buttonConfirm')
-          .setLabel('Click me!')
+          .setLabel('I AM SURE')
           .setStyle(ButtonStyle.Danger),
       );
-    await interaction.reply({ content: 'I think you should,', components: [row] });
+    await interaction.reply({ content: 'ARE YOU SURE YOU WANT TO RUN THIS COMMAND?\n(THIS COMMAND IS DESTRUCTIVE AND THE CHANGES CANNOT BE UNDONE)', components: [row] });
   },
 };
