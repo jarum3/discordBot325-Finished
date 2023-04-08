@@ -8,11 +8,12 @@ module.exports = {
   async execute(interaction: BaseInteraction) {
     if (!interaction.isButton()) return;
     if (!(interaction.customId === 'semester-start')) return;
+    await interaction.deferUpdate();
     // Loop through previous semester, archive each course, discarding it from the list.
     // Then, loop through each current course, creating a category for it and moving it to the previous semester file.
     // Then, reset the semester value, and ensure that the course list is empty.
-    const prevCourses = getListFromFile('../data/prevsemester.json') as CourseRole[];
-    const newCourses = getListFromFile('../data/courses.json') as CourseRole[];
+    const prevCourses = getListFromFile('data/prevsemester.json') as CourseRole[];
+    const newCourses = getListFromFile('data/courses.json') as CourseRole[];
     const prevCoursesNames: string[] = [];
     const newCoursesNames: string[] = [];
     prevCourses.forEach(elem => prevCoursesNames.push(elem.name));
@@ -24,8 +25,9 @@ module.exports = {
       for (const course of newCourses) {
         createAndPopulateCategory(course, interaction.guild.channels);
       }
-      fs.writeFileSync('../data/currentsemester.txt', '');
-      saveListToFile([], '../data/courses.json');
+      fs.writeFileSync('data/currentsemester.txt', '');
+      saveListToFile([], 'data/courses.json');
     }
+    await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });
   },
 };

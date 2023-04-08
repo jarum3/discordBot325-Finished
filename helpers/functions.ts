@@ -212,6 +212,29 @@ export async function CourseSelectMenu(customId: string, multi: boolean): Promis
 }
 
 /**
+ * Creates a select menu containing the upcoming list of courses
+ * @param {string} customId - ID to identify event-handler assigned to this menu
+ * @param {boolean} multi - Whether to allow for multiple selections, if false, only one will be available at a time.
+ * @returns {Promise<import('discord.js').ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>>} The row object to use as a components: [row] section of an interaction reply
+ */
+export async function CourseSelectMenuFuture(customId: string, multi: boolean): Promise<ActionRowBuilder<StringSelectMenuBuilder> | undefined> {
+  const rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  if (rolesList.length === 0) {
+    return undefined;
+  }
+  const options: SelectMenuComponentOptionData[] = [];
+  rolesList.forEach((element: CourseRole) => options.push({ label: element.name, description: element.name, value: element.name }));
+  const max = multi ? options.length : 1;
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(new StringSelectMenuBuilder()
+    .setCustomId(customId)
+    .setPlaceholder('Nothing selected')
+    .setMinValues(1)
+    .setMaxValues(max)
+    .addOptions(options));
+  return row;
+}
+
+/**
  *
  * @param {import('discord.js').Guild} guild - Guild to create the role in
  * @param {string} name - Name of new role.
@@ -304,13 +327,13 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
   }
   createChannelInCat(course, 'introduce-yourself');
   createChannelInCat(course, 'chat');
-  const prevRolesList = getListFromFile('../data/prevsemester.json') as CourseRole[];
+  const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   prevRolesList.push(course);
-  saveListToFile(prevRolesList, '../data/prevsemester.json');
-  const currRoles = getListFromFile('../data/courses.json') as CourseRole[];
+  saveListToFile(prevRolesList, 'data/prevsemester.json');
+  const currRoles = getListFromFile('data/courses.json') as CourseRole[];
   const remover = currRoles.indexOf(course);
   currRoles.splice(remover, 1);
-  saveListToFile(currRoles, '../data/courses.json');
+  saveListToFile(currRoles, 'data/courses.json');
   return course.category;
 }
 

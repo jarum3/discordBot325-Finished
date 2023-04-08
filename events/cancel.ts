@@ -5,6 +5,6 @@ module.exports = {
   async execute(interaction: BaseInteraction) {
     if (!interaction.isButton()) return;
     if (!(interaction.customId === 'cancel')) return;
-    interaction.deleteReply();
+    interaction.update({ content: 'Action cancelled!', components: [], embeds: [] });
   },
 };

@@ -18,8 +18,8 @@ module.exports = {
     const semester = interaction.options.getString('name');
     if (semester !== null) {
       fs.writeFileSync('data/currentsemester.txt', semester);
-      interaction.reply('New semester: ' + semester);
+      interaction.reply({ content: 'New semester: ' + semester, ephemeral: true });
     }
-    else interaction.reply('Sorry, that input was invalid.');
+    else interaction.reply({ content: 'Sorry, that input was invalid.', ephemeral: true });
   },
 };

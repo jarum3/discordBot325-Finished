@@ -3,10 +3,9 @@
  * @packageDocumentation
  */
 import { SlashCommandBuilder, ChatInputCommandInteraction, ButtonStyle } from 'discord.js';
-import { getListFromFile } from '../helpers/functions';
+import { getListFromFile, getSemester } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder } from '@discordjs/builders';
-import * as fs from 'node:fs';
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('startsemester')
@@ -20,9 +19,9 @@ module.exports = {
     const newCoursesNames: string[] = [];
     prevCourses.forEach(elem => prevCoursesNames.push(elem.name));
     newCourses.forEach(elem => newCoursesNames.push(elem.name));
-    const semesterValue = fs.readFileSync('data/semester.txt').toString();
+    const semesterValue = getSemester();
     if (!semesterValue) {
-      await interaction.reply('Please use /setsemester to set a time period first (e.g. Winter 2022)');
+      await interaction.reply({ content: 'Please use /setsemester to set a time period first (e.g. Winter 2022)', ephemeral: true });
       return;
     }
     const embed = new EmbedBuilder()
@@ -46,6 +45,6 @@ module.exports = {
           .setLabel('Cancel')
           .setStyle(ButtonStyle.Secondary),
       );
-    await interaction.reply({ embeds: [embed], components: [row] });
+    await interaction.reply({ embeds: [embed], components: [row], ephemeral: true });
   },
 };
