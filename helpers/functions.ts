@@ -195,7 +195,7 @@ export async function RoleSelectMenu(customId: string, multi: boolean): Promise<
  * @returns {Promise<import('discord.js').ActionRowBuilder<import('discord.js').StringSelectMenuBuilder>>} The row object to use as a components: [row] section of an interaction reply
  */
 export async function CourseSelectMenu(customId: string, multi: boolean): Promise<ActionRowBuilder<StringSelectMenuBuilder> | undefined> {
-  const rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  const rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   if (rolesList.length === 0) {
     return undefined;
   }

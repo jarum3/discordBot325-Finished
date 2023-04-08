@@ -16,7 +16,7 @@ module.exports = {
     if (!(interaction.guild && interaction.member)) return;
     await interaction.deferReply({ ephemeral: true });
     const addedCourses = [];
-    const rolesList = getListFromFile('data/courses.json');
+    const rolesList = getListFromFile('data/prevsemester.json');
     const rolesSelected = interaction.values;
     // Assign roles
     for (const course of rolesList) {

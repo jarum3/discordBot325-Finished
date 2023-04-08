@@ -26,6 +26,7 @@ module.exports = {
       const selectedCourse = rolesList.indexOf(selectedCourseObject);
       const guild = interaction.guild;
       let jointChild;
+      // TODO move all of this joint child handling into the helpers function for creating categories
       const jointChildObject = rolesList.find(element => element.jointClass === rolesList[selectedCourse].name);
       if (jointChildObject) jointChild = rolesList.indexOf(jointChildObject);
       let jointParent: CourseRole | undefined;
