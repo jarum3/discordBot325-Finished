@@ -14,9 +14,6 @@ module.exports = {
     .setDefaultMemberPermissions(0)
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction) {
-    // Loop over each course in prevsemester.json, archive it, save that data to one file, then loop over each new course in courses.json
-    // Then move each course over to prevsemester.json
-    // TODO Add confirmation button with embed displaying previous semesters to archive, and current semesters to instantiate
     const prevCourses = getListFromFile('data/prevsemester.json') as CourseRole[];
     const newCourses = getListFromFile('data/courses.json') as CourseRole[];
     const prevCoursesNames: string[] = [];
@@ -24,6 +21,10 @@ module.exports = {
     prevCourses.forEach(elem => prevCoursesNames.push(elem.name));
     newCourses.forEach(elem => newCoursesNames.push(elem.name));
     const semesterValue = fs.readFileSync('data/semester.txt').toString();
+    if (!semesterValue) {
+      await interaction.reply('Please use /setsemester to set a time period first (e.g. Winter 2022)');
+      return;
+    }
     const embed = new EmbedBuilder()
       .setTitle('Semester Confirmation')
       .setColor(0xDD7711)
@@ -41,7 +42,7 @@ module.exports = {
           .setLabel('Confirm')
           .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
-          .setCustomId('semester-cancel')
+          .setCustomId('cancel')
           .setLabel('Cancel')
           .setStyle(ButtonStyle.Secondary),
       );
