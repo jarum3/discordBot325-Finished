@@ -12,7 +12,7 @@ export function getSemester(): string {
 }
 
 export async function archiveCourse(courseList: string[], guild: Guild) {
-  let rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  let rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
   for (const selectedElement of courseList) {
     for (const course of rolesList) {
@@ -50,9 +50,10 @@ export async function archiveCourse(courseList: string[], guild: Guild) {
           if (position >= 0) category.setPosition(position);
           else category.setPosition(300000);
           if (serverRole) {
-            const permissions = category.permissionsFor(serverRole).serialize();
-            category.permissionOverwrites.delete(serverRole);
-            if (serverVeteranRole) category.permissionOverwrites.create(serverVeteranRole, permissions);
+            const permissions = await category.permissionsFor(serverRole).serialize();
+            await category.permissionOverwrites.delete(serverRole);
+            if (serverVeteranRole) await category.permissionOverwrites.create(serverVeteranRole, permissions);
+            // TODO handle announcements and zoom video channel permissions separately
           }
           // Category = current category
           // ServerRole = Course Role
@@ -67,25 +68,14 @@ export async function archiveCourse(courseList: string[], guild: Guild) {
           }
           for (const student of students) {
             if (serverRole && serverVeteranRole) {
-              student.roles.remove(serverRole);
-              student.roles.add(serverVeteranRole);
+              await student.roles.remove(serverRole);
+              await student.roles.add(serverVeteranRole);
             }
           }
+          // Remove from prev semester list
           const index = rolesList.indexOf(course);
           rolesList = rolesList.splice(index, 1);
-          const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
-          const oldCourse = new CourseRole({
-            prefix: course.prefix,
-            number: course.number,
-            role: course.role,
-            veteranRole: course.veteranRole,
-            video: course.video,
-            jointClass: course.jointClass,
-            name: course.name,
-          });
-          prevRolesList.push(oldCourse);
-          saveListToFile(rolesList, 'data/courses.json');
-          saveListToFile(prevRolesList, 'data/prevsemester.json');
+          saveListToFile(rolesList, 'data/prevsemester.json');
         }
       }
     }
@@ -318,6 +308,9 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
   }
   createChannelInCat(course, 'introduce-yourself');
   createChannelInCat(course, 'chat');
+  const prevRolesList = getListFromFile('../../data/prevsemester.json') as CourseRole[];
+  prevRolesList.push(course);
+  saveListToFile(prevRolesList, 'data/prevsemester.json');
   return course.category;
 }
 

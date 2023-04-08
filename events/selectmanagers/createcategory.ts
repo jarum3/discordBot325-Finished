@@ -9,7 +9,7 @@
  */
 import { CategoryChannel } from 'discord.js';
 import { Events, BaseInteraction } from 'discord.js';
-import { createAndPopulateCategory, getListFromFile, saveListToFile } from '../../helpers/functions';
+import { createAndPopulateCategory, getListFromFile } from '../../helpers/functions';
 import { CourseRole } from '../../helpers/role';
 
 module.exports = {
@@ -51,9 +51,7 @@ module.exports = {
         }
       }
       const category = await createAndPopulateCategory(rolesList[selectedCourse], guild.channels);
-      rolesList[selectedCourse].category = category;
       if (jointChild && rolesList[jointChild]) rolesList[jointChild].category = category;
-      saveListToFile(rolesList, 'data/courses.json');
       await interaction.editReply({ content: 'Category created!', components: [] });
     }
     // Shouldn't reach here, but the error-check is necessary for compilation

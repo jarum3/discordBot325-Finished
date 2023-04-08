@@ -81,7 +81,6 @@ module.exports = {
     }
     if (!veteranRole) {
       const veteranColor = adjustColor(color.toString(), -35) as ColorResolvable;
-      console.log('COLOR: ' + veteranColor);
       veteranRole = await createRole(interaction.guild, roleName + ' Veteran', veteranColor);
       // TODO set permissions and position
     }
