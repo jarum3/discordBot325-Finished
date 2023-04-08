@@ -1,4 +1,4 @@
-import { ColorResolvable, Colors, Role, CategoryChannel, Guild, ChannelType, TextChannel, PermissionsBitField, OverwriteType, ActionRowBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder, GuildChannelManager } from 'discord.js';
+import { ColorResolvable, Colors, Role, CategoryChannel, Guild, ChannelType, TextChannel, PermissionsBitField, OverwriteType, ActionRowBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder, GuildChannelManager, GuildMember, GuildBasedChannel } from 'discord.js';
 import { CourseRole, OptionalRole } from './role';
 import * as fs from 'node:fs';
 
@@ -9,6 +9,87 @@ import * as fs from 'node:fs';
 export function getSemester(): string {
   if (!fs.existsSync('data/currentsemester.txt')) fs.writeFileSync('data/currentsemester.txt', '');
   return fs.readFileSync('data/currentsemester.txt').toString().split('\n')[0];
+}
+
+export async function archiveCourse(courseList: string[], guild: Guild) {
+  let rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  // Assign roles in a loop, in case we want to make this a multi-select later.
+  for (const selectedElement of courseList) {
+    for (const course of rolesList) {
+      if (course.name != selectedElement) continue;
+      const courseRole = course.role;
+      const veteranRole = course.veteranRole;
+      const serverRole = await guild.roles.fetch(courseRole.id);
+      const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
+      if (course.category) {
+        const category = await guild.channels.fetch(course.category.id) as CategoryChannel;
+        if (category) {
+          const channels: CategoryChannel[] = [];
+          for (const channelArray of guild.channels.cache.entries()) {
+            for (const possibleChannel of channelArray) {
+              if ((<GuildBasedChannel>possibleChannel).name !== undefined) {
+                const channel = possibleChannel as GuildBasedChannel;
+                if ((<CategoryChannel>channel).children !== undefined) {
+                  channels.push(channel as CategoryChannel);
+                }
+              }
+            }
+          }
+
+          channels.sort((a, b) => a.position - b.position);
+          // channels now represents all the categories in the server, sorted by their position
+          let foundCurrent = false;
+          let position = -1;
+          for (const channel of channels) {
+            if (channel.name.includes(getSemester())) foundCurrent = true;
+            if (foundCurrent === true && !channel.name.includes(getSemester())) {
+              position = channel.position - 1;
+              break;
+            }
+          }
+          if (position >= 0) category.setPosition(position);
+          else category.setPosition(300000);
+          if (serverRole) {
+            const permissions = category.permissionsFor(serverRole).serialize();
+            category.permissionOverwrites.delete(serverRole);
+            if (serverVeteranRole) category.permissionOverwrites.create(serverVeteranRole, permissions);
+          }
+          // Category = current category
+          // ServerRole = Course Role
+          // ServerVeteranRole = Veteran Role
+          // Find students with current student role
+          const students: GuildMember[] = [];
+          for (const studentsArray of guild.members.cache.entries()) {
+            for (const possibleStudent of studentsArray) {
+              const student = possibleStudent as GuildMember;
+              if ((<GuildMember>student).roles !== undefined) students.push(student as GuildMember);
+            }
+          }
+          for (const student of students) {
+            if (serverRole && serverVeteranRole) {
+              student.roles.remove(serverRole);
+              student.roles.add(serverVeteranRole);
+            }
+          }
+          const index = rolesList.indexOf(course);
+          rolesList = rolesList.splice(index, 1);
+          const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
+          const oldCourse = new CourseRole({
+            prefix: course.prefix,
+            number: course.number,
+            role: course.role,
+            veteranRole: course.veteranRole,
+            video: course.video,
+            jointClass: course.jointClass,
+            name: course.name,
+          });
+          prevRolesList.push(oldCourse);
+          saveListToFile(rolesList, 'data/courses.json');
+          saveListToFile(prevRolesList, 'data/prevsemester.json');
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -142,12 +223,6 @@ export async function CourseSelectMenu(customId: string, multi: boolean): Promis
   return row;
 }
 
-/*
-export async function archiveCategory(category: CategoryChannel, originalRole: Role, newRole: Role): Promise<void> {
-
-}
-*/
-
 /**
  *
  * @param {import('discord.js').Guild} guild - Guild to create the role in
@@ -214,7 +289,8 @@ export function capitalizeString(string: string): string {
  * @returns {ColorResolvable} random hex code as 6-character ColorResolvable
  */
 export function generateColor(): ColorResolvable {
-  return Math.floor(Math.random() * 16777215).toString(16) as ColorResolvable;
+  const color = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+  return '#' + color as ColorResolvable;
 }
 
 /**
@@ -296,5 +372,5 @@ export function adjustColor(col: string, amt: number): string | undefined {
   let g = (num & 0x0000FF) + amt;
   if (g > 255) g = 255;
   else if (g < 0) g = 0;
-  return (usePound ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
+  return (usePound ? '#' : '') + ((g | (b << 8) | (r << 16)).toString(16).padStart(6, '0'));
 }
