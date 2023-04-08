@@ -16,7 +16,7 @@ module.exports = {
     if (!(interaction.customId === 'archive-course')) return;
     if (!(interaction.guild)) return;
     await interaction.deferUpdate();
-    await archiveCourse(interaction.values, interaction.guild);
+    await archiveCourse(interaction.values[0], interaction.guild);
     interaction.editReply('Course archived!');
   },
 };

@@ -11,27 +11,25 @@ export function getSemester(): string {
   return fs.readFileSync('data/currentsemester.txt').toString().split('\n')[0];
 }
 
-export async function archiveCourse(courseList: string[], guild: Guild) {
+export async function archiveCourse(courseInput: string, guild: Guild) {
   let rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
-  for (const selectedElement of courseList) {
-    for (const course of rolesList) {
-      if (course.name != selectedElement) continue;
-      const courseRole = course.role;
-      const veteranRole = course.veteranRole;
-      const serverRole = await guild.roles.fetch(courseRole.id);
-      const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
-      if (course.category) {
-        const category = await guild.channels.fetch(course.category.id) as CategoryChannel;
-        if (category) {
-          const channels: CategoryChannel[] = [];
-          for (const channelArray of guild.channels.cache.entries()) {
-            for (const possibleChannel of channelArray) {
-              if ((<GuildBasedChannel>possibleChannel).name !== undefined) {
-                const channel = possibleChannel as GuildBasedChannel;
-                if ((<CategoryChannel>channel).children !== undefined) {
-                  channels.push(channel as CategoryChannel);
-                }
+  for (const course of rolesList) {
+    if (course.name != courseInput) continue;
+    const courseRole = course.role;
+    const veteranRole = course.veteranRole;
+    const serverRole = await guild.roles.fetch(courseRole.id);
+    const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
+    if (course.category) {
+      const category = await guild.channels.fetch(course.category.id) as CategoryChannel;
+      if (category) {
+        const channels: CategoryChannel[] = [];
+        for (const channelArray of guild.channels.cache.entries()) {
+          for (const possibleChannel of channelArray) {
+            if ((<GuildBasedChannel>possibleChannel).name !== undefined) {
+              const channel = possibleChannel as GuildBasedChannel;
+              if ((<CategoryChannel>channel).children !== undefined) {
+                channels.push(channel as CategoryChannel);
               }
             }
           }
@@ -308,9 +306,13 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
   }
   createChannelInCat(course, 'introduce-yourself');
   createChannelInCat(course, 'chat');
-  const prevRolesList = getListFromFile('../../data/prevsemester.json') as CourseRole[];
+  const prevRolesList = getListFromFile('../data/prevsemester.json') as CourseRole[];
   prevRolesList.push(course);
-  saveListToFile(prevRolesList, 'data/prevsemester.json');
+  saveListToFile(prevRolesList, '../data/prevsemester.json');
+  const currRoles = getListFromFile('../data/courses.json') as CourseRole[];
+  const remover = currRoles.indexOf(course);
+  currRoles.splice(remover, 1);
+  saveListToFile(currRoles, '../data/courses.json');
   return course.category;
 }
 
