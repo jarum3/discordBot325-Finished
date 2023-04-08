@@ -237,7 +237,6 @@ export async function createRole(guild: Guild, name: string, color: ColorResolva
  * @param {string} file - Valid file path to read from
  */
 export function saveListToFile(list: CourseRole[] | OptionalRole[], file: string): void {
-  // TODO Solve possible concurrency problems
   const listJson = JSON.stringify(list);
   fs.writeFileSync(file, listJson, 'utf-8');
 }
@@ -247,7 +246,6 @@ export function saveListToFile(list: CourseRole[] | OptionalRole[], file: string
  * @returns {import('./role').CourseRole[] | import('./role').OptionalRole[]}
  */
 export function getListFromFile(file: string): CourseRole[] | OptionalRole[] {
-  // TODO Solve possible concurrency problems
   if (!fs.existsSync(file)) fs.writeFileSync(file, '[]');
   const text = fs.readFileSync(file).toString('utf-8');
   return JSON.parse(text);

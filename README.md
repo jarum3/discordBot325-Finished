@@ -32,8 +32,8 @@ This source code is documented using several features specific to [Typedoc](http
 # Description of progress
 
 ## To-do
-- [ ] Create semester tracking system, attaching semester value to category names
-- [ ] Implement everything together with one start semester command, taking a semester's name as an argument. This should implement everything done so far for every course object, archiving old courses, creating roles if necessary. Then it should ask if the user is sure they'd like to do this, with a list of courses that will be added and a list of courses that will be archived.
+- [x] Create semester tracking system, attaching semester value to category names
+- [x] Implement everything together with one start semester command, taking a semester's name as an argument. This should implement everything done so far for every course object, archiving old courses, creating roles if necessary. Then it should ask if the user is sure they'd like to do this, with a list of courses that will be added and a list of courses that will be archived.
 - [ ] Currently, many errors are simply guarded against with return statements, but these cases should display a message to the user. These type-guards are generally at the top of files, checking that the command was executed within a guild, and valid data was provided.
 
 ## Previous features
