@@ -19,7 +19,7 @@ module.exports = {
     .setDefaultMemberPermissions(0)
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction) {
-    // TODO add confirmation button!
+    // This is very destructive but also useful for testing
     await interaction.deferReply({ ephemeral: true });
     const category: CategoryChannel = interaction.options.getChannel('category') as CategoryChannel;
     category.children.cache.forEach(channel => { channel.delete('Deleted as part of category deletion'); });
