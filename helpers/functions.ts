@@ -12,7 +12,6 @@ export function getSemester(): string {
 }
 
 export async function archiveCourse(courseInput: string, guild: Guild) {
-  // TODO add handling for joint courses
   let rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
   for (const course of rolesList) {
