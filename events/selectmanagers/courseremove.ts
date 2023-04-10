@@ -14,7 +14,6 @@ import { CourseRole } from '../../helpers/role';
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction: BaseInteraction) {
-    // TODO add handling for joint courses
     if (!interaction.isStringSelectMenu()) return;
     if (!(interaction.customId === 'course-remove')) return;
     if (!(interaction.guild)) return;
