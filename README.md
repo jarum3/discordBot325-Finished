@@ -1,5 +1,5 @@
 # Group 7 - CSC-325 Discord Bot
-This bot is built off of [this previous point](https://github.com/jarum3/discordBot325-Progress1)
+This bot is built off of [this previous point](https://github.com/jarum3/discordBot325-Progress3)
 
 This bot seeks to create an effective system for managing roles automatically, specifically with a structure designed for students having access to channels for certain courses.
 
@@ -8,6 +8,9 @@ This bot runs from [app.js](app.js), processes commands as exports with a data a
 Additionally, [This ESLint file](.eslintrc.json) lists out rules for formatting when pushing code, I'd recommend using some automatic linter to ensure those rules are followed. In cases where rules are manually disabled by-file or by-line, please include justification for why this needs to be done next to the disabling comment. For Visual Studio Code, make sure to include "typescript" under your "eslint.validate" settings.
 
 # Getting started
+
+## Quickstart
+To run this bot, it should be as easy as running ``npm install`` inside the root project directory, then ``npm run start``. Please run the /help command once it's started for usage details.
 
 ## Typescript details
 To compile this bot, use [This guide](https://www.typescripttutorial.net/typescript-tutorial/setup-typescript/) to get started with a typescript compiler on your system, then run tsc in the root directory. After this, copy .env files (described below) into the build directory. Alternatively, you can use ts-node as described in the guide above. These are also combined into scripts start (for ts-node) and start-prod (for a full compile and run.)
@@ -29,21 +32,8 @@ Run [deploy-commands.js](deploy-commands.ts) after adding any new command files,
 ## Documentation
 This source code is documented using several features specific to [Typedoc](https://typedoc.org/). This documentation can be generated using npm run docs, and can be hosted anywhere. Given the nature of many event handler and command handler modules, many of these are documented as the entire source file, rather than an individual function.
 
-# Description of progress
+## Troubleshooting
+In the event that files are moved, tsc doesn't automatically delete them in the build folder. Deleting the build folder after major changes could be useful to avoid name collisions or garbage data.
 
-## Features
-- [x] Create semester tracking system, attaching semester value to category names
-- [x] Implement everything together with one start semester command, taking a semester's name as an argument. This should implement everything done so far for every course object, archiving old courses, creating roles if necessary. Then it should ask if the user is sure they'd like to do this, with a list of courses that will be added and a list of courses that will be archived.
-- [x] Create list of archived courses to keep track of, separate from removing a course
-- [x] Create functionality to create, populate, and archive categories and attach those to role objects
-- [x] Lock permissions for essentially all current slash-commands behind administrative privileges
-- [x] Clean up edge cases for role deletions outside of bot interactions
-- [x] Handle joint course adding with temporary dropdown
-- [x] Adjusting structure of roles and functions to be more practical
-- [x] Commands for adding and dropping courses and optional roles from saved lists
-- [x] Commands for generating a dropdown that both displays that list, and assigns roles to members on interactions
-- [x] Separation into testing commands for easier deployment
-- [x] Generating random valid colors (Sourced from [here](https://css-tricks.com/snippets/javascript/random-hex-color/)), and adjusting the brightness of those colors by a certain amount (Sourced from [here](https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors))
-- [x] Checking input colors against a regular expression to ensure validity
-- [x] Creating roles, channels, and categories programmatically
-- [x] Structure for course data, methods, and optional role data
+## Features from other sources
+- Generating random valid colors (Sourced from [here](https://css-tricks.com/snippets/javascript/random-hex-color/)), and adjusting the brightness of those colors by a certain amount (Sourced from [here](https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors))
