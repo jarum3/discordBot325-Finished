@@ -377,9 +377,8 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
       }
       createChannelInCat(course, 'introduce-yourself');
       createChannelInCat(course, 'chat');
-      const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
-      prevRolesList.push(course);
-      saveListToFile(prevRolesList, 'data/prevsemester.json');
+      prevRoles.push(course);
+      saveListToFile(prevRoles, 'data/prevsemester.json');
       const currRoles = getListFromFile('data/courses.json') as CourseRole[];
       const remover = currRoles.indexOf(course);
       currRoles.splice(remover, 1);
