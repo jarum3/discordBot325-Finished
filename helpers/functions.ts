@@ -91,6 +91,40 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
   }
 }
 
+export async function checkCategory(course: CourseRole) {
+  const rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
+  let jointChild;
+  const selectedCourse = rolesList.indexOf(course);
+  const tempCourse = rolesList[selectedCourse];
+  if (tempCourse) {
+    let jointChildObject = rolesList.find(element => element.jointClass === tempCourse.name);
+    if (!jointChildObject) jointChildObject = prevRoles.find(element => element.jointClass === tempCourse.name);
+    if (jointChildObject) {
+      jointChild = rolesList.indexOf(jointChildObject);
+      if (!jointChild) jointChild = prevRoles.indexOf(jointChildObject);
+    }
+    let jointParent: CourseRole | undefined;
+    if (tempCourse.jointClass) {
+      jointParent = rolesList.find(element => element.name === tempCourse.jointClass);
+      if (!jointParent) jointParent = prevRoles.find(element => element.name === tempCourse.jointClass);
+    }
+    if (jointChildObject) {
+      if (jointChildObject.category) {
+        rolesList[selectedCourse].category = jointChildObject.category;
+      }
+    }
+    if (jointParent) {
+      rolesList[selectedCourse].jointClass = jointParent.name;
+      if (jointParent.category) {
+        rolesList[selectedCourse].category = jointParent.category;
+      }
+    }
+    saveListToFile(rolesList, 'data/courses.json');
+    return rolesList[selectedCourse].category;
+  }
+}
+
 /**
  * Writes a string to a file to be read later as semester data
  * @param {string} string - The value of the current semester
@@ -326,25 +360,32 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
   const courseNumber: string = course.jointClass
     ? course.number + '-and-' + course.jointClass.split('-')[1]
     : course.number;
-  course.category = await createCategory(categoryName, channelManager, course.role);
-  createChannelInCat(course, 'announcements-' + courseNumber, true);
-  createChannelInCat(course, 'zoom-meeting-info-' + courseNumber, true);
-  if (course.video) {
-    const videoChannel = await createChannelInCat(course, 'how-to-make-a-video', true);
-    if (videoChannel) {
-      const messages = parseLines('data/videoMessages.txt');
-      messages.forEach(message => videoChannel.send(message));
+  if (!course.category) {
+    const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
+    course.category = prevRoles.find(elem => elem.name === course.jointClass)?.category;
+    if (!course.category) course.category = prevRoles.find(elem => elem.jointClass === course.name)?.category;
+    if (!course.category) {
+      course.category = await createCategory(categoryName, channelManager, course.role);
+      createChannelInCat(course, 'announcements-' + courseNumber, true);
+      createChannelInCat(course, 'zoom-meeting-info-' + courseNumber, true);
+      if (course.video) {
+        const videoChannel = await createChannelInCat(course, 'how-to-make-a-video', true);
+        if (videoChannel) {
+          const messages = parseLines('data/videoMessages.txt');
+          messages.forEach(message => videoChannel.send(message));
+        }
+      }
+      createChannelInCat(course, 'introduce-yourself');
+      createChannelInCat(course, 'chat');
+      const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
+      prevRolesList.push(course);
+      saveListToFile(prevRolesList, 'data/prevsemester.json');
+      const currRoles = getListFromFile('data/courses.json') as CourseRole[];
+      const remover = currRoles.indexOf(course);
+      currRoles.splice(remover, 1);
+      saveListToFile(currRoles, 'data/courses.json');
     }
   }
-  createChannelInCat(course, 'introduce-yourself');
-  createChannelInCat(course, 'chat');
-  const prevRolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
-  prevRolesList.push(course);
-  saveListToFile(prevRolesList, 'data/prevsemester.json');
-  const currRoles = getListFromFile('data/courses.json') as CourseRole[];
-  const remover = currRoles.indexOf(course);
-  currRoles.splice(remover, 1);
-  saveListToFile(currRoles, 'data/courses.json');
   return course.category;
 }
 

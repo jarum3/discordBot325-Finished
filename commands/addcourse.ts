@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 import { SlashCommandStringOption, SlashCommandBuilder, SlashCommandBooleanOption, ChatInputCommandInteraction, ColorResolvable } from 'discord.js';
-import { generateColor, getListFromFile, adjustColor, saveListToFile, createRole, CourseSelectMenu } from '../helpers/functions';
+import { generateColor, getListFromFile, adjustColor, saveListToFile, createRole, CourseSelectMenuFuture } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 // Adds a course to the list of courses, with a role and veteran role attached
 module.exports = {
@@ -84,7 +84,7 @@ module.exports = {
     }
     if (prefix && number && role && veteranRole && (video != undefined)) {
       if (jointClass) {
-        const row = await CourseSelectMenu('joint-course', false);
+        const row = await CourseSelectMenuFuture('joint-course', false);
         if (row) await interaction.editReply({ content: 'Please select a course to share a category with', components: [row] });
         else {
           await interaction.editReply({

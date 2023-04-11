@@ -1,5 +1,5 @@
 import { Events, BaseInteraction } from 'discord.js';
-import { archiveCourse, createAndPopulateCategory, getListFromFile, saveListToFile } from '../helpers/functions';
+import { archiveCourse, checkCategory, createAndPopulateCategory, getListFromFile, saveListToFile } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 import * as fs from 'node:fs';
 
@@ -22,12 +22,19 @@ module.exports = {
       for (const course of prevCourses) {
         if (interaction.guild) archiveCourse(course.name, interaction.guild);
       }
+      saveListToFile([], 'data/prevsemester.json');
       for (const course of newCourses) {
-        createAndPopulateCategory(course, interaction.guild.channels);
+        let category = await checkCategory(course);
+        if (!category) category = await createAndPopulateCategory(course, interaction.guild.channels);
+        if (category) {
+          const serverCategory = await interaction.guild.channels.fetch(category.id);
+          if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
+        }
+        fs.writeFileSync('data/currentsemester.txt', '');
+        saveListToFile([], 'data/courses.json');
       }
-      fs.writeFileSync('data/currentsemester.txt', '');
-      saveListToFile([], 'data/courses.json');
+      await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });
+      return;
     }
-    await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });
   },
 };
