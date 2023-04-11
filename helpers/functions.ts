@@ -45,8 +45,8 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
               break;
             }
           }
-          if (position >= 0) category.setPosition(position);
-          else category.setPosition(300000);
+          if (position >= 0) await category.setPosition(position);
+          else await category.setPosition(300000);
           if (serverRole) {
             const permissions = await category.permissionsFor(serverRole).serialize();
             await category.permissionOverwrites.delete(serverRole);
