@@ -1,5 +1,8 @@
 /**
- * TODO
+ * Slash-command to generate an embed with classes to be created / archived, with button confirmation
+ * # Button
+ * * Creates two buttons, confirmation with CustomId 'semester-start', and cancellation with CustomId 'cancel'.
+ * Implementation defined in the {@link events/semesterstart | Semester button handler}
  * @packageDocumentation
  */
 import { SlashCommandBuilder, ChatInputCommandInteraction, ButtonStyle } from 'discord.js';

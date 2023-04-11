@@ -11,6 +11,11 @@ export function getSemester(): string {
   return fs.readFileSync('data/currentsemester.txt').toString().split('\n')[0];
 }
 
+/**
+ * Function to move a course, transfer its students roles, change permissions, and move the course to a new list
+ * @param courseInput Course to be archived
+ * @param guild Guild that the course's roles and categories exist within
+ */
 export async function archiveCourse(courseInput: string, guild: Guild) {
   let rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
@@ -101,7 +106,12 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
   }
 }
 
-export async function checkCategory(course: CourseRole) {
+/**
+ * Checks through both lists for possible joint course values, writes to given course.
+ * @param course Course to be checked
+ * @returns Category for the given course, if found
+ */
+export async function checkCategory(course: CourseRole): Promise<CategoryChannel | undefined> {
   const rolesList = getListFromFile('data/courses.json') as CourseRole[];
   const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
   let jointChild;

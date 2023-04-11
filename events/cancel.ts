@@ -1,3 +1,7 @@
+/**
+ * Button handler for action cancellation
+ * @packageDocumentation
+ */
 import { Events, BaseInteraction } from 'discord.js';
 
 module.exports = {

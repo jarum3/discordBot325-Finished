@@ -36,4 +36,5 @@ This source code is documented using several features specific to [Typedoc](http
 In the event that files are moved, tsc doesn't automatically delete them in the build folder. Deleting the build folder after major changes could be useful to avoid name collisions or garbage data.
 
 ## Features from other sources
+- Generating documentation (Sourced from [here](https://typedoc.org/) with [this](https://www.npmjs.com/package/typedoc-theme-hierarchy) as a theme.)
 - Generating random valid colors (Sourced from [here](https://css-tricks.com/snippets/javascript/random-hex-color/)), and adjusting the brightness of those colors by a certain amount (Sourced from [here](https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors))

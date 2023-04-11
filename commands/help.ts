@@ -6,7 +6,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from '
 // Prints out every available command, has to be manually updated
 module.exports = {
 
-  data: new SlashCommandBuilder().setName('help').setDescription('Embeds with Pong!'),
+  data: new SlashCommandBuilder().setName('help').setDescription('Provides info on commands.'),
   async execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setTitle('Help')

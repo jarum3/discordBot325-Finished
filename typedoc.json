@@ -1,18 +1,21 @@
 {
   "entryPoints": [
+    "./commands/",
+    "./events/",
+    "./helpers/",
+    "./events/selectmanagers/",
     "./app.ts",
-    "./commands/*",
-    "./events",
-    "./helpers",
-    "./deploy-commands.ts"
+    "./deploy-commands.ts",
   ],
   "entryPointStrategy": "expand",
   "out": "doc/",
+  "basePath": "./",
   "plugin": [
     "typedoc-theme-hierarchy"
   ],
+  "tsconfig": "./tsconfig.json",
   "theme": "hierarchy",
   "excludeInternal": false,
   "githubPages": false,
-  "name": "ungeheueres Ungeziefer",
+  "name": "Group 7s Bot",
 }
