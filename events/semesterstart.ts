@@ -1,4 +1,4 @@
-import { Events, BaseInteraction } from 'discord.js';
+import { Events, BaseInteraction, ChannelType } from 'discord.js';
 import { archiveCourse, checkCategory, createAndPopulateCategory, getListFromFile, saveListToFile } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 import * as fs from 'node:fs';
@@ -16,11 +16,14 @@ module.exports = {
     const newCourses = getListFromFile('data/courses.json') as CourseRole[];
     const prevCoursesNames: string[] = [];
     const newCoursesNames: string[] = [];
+    const topCategory = interaction.guild?.channels.cache.find(elem => elem.type === ChannelType.GuildCategory && elem.position === 0);
     prevCourses.forEach(elem => prevCoursesNames.push(elem.name));
     newCourses.forEach(elem => newCoursesNames.push(elem.name));
     if (interaction.guild) {
       for (const course of prevCourses) {
-        if (interaction.guild) archiveCourse(course.name, interaction.guild);
+        console.log('YIPPEE');
+        if (interaction.guild) await archiveCourse(course.name, interaction.guild);
+        console.log('YIPPEE2');
       }
       saveListToFile([], 'data/prevsemester.json');
       for (const course of newCourses) {
@@ -30,9 +33,10 @@ module.exports = {
           const serverCategory = await interaction.guild.channels.fetch(category.id);
           if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
         }
-        fs.writeFileSync('data/currentsemester.txt', '');
-        saveListToFile([], 'data/courses.json');
       }
+      fs.writeFileSync('data/currentsemester.txt', '');
+      saveListToFile([], 'data/courses.json');
+      if (topCategory) await interaction.guild.channels.setPosition(topCategory, 0);
       await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });
       return;
     }

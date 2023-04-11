@@ -20,8 +20,11 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
     const veteranRole = course.veteranRole;
     const serverRole = await guild.roles.fetch(courseRole.id);
     const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
-    if (course.category) {
-      const category = await guild.channels.fetch(course.category.id) as CategoryChannel;
+    const possibleCategory = course.category;
+    let category: CategoryChannel | undefined;
+    if (possibleCategory) {
+      const possibleCat = await guild.channels.cache.find(elem => elem.id === possibleCategory.id);
+      if (possibleCat) category = await guild.channels.fetch(possibleCat.id) as CategoryChannel;
       if (category) {
         const channels: CategoryChannel[] = [];
         for (const channelArray of guild.channels.cache.entries()) {
@@ -33,60 +36,67 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
               }
             }
           }
+        }
 
-          channels.sort((a, b) => a.position - b.position);
-          // channels now represents all the categories in the server, sorted by their position
-          let foundCurrent = false;
-          let position = -1;
-          for (const channel of channels) {
-            if (channel.name.includes(getSemester())) foundCurrent = true;
-            if (foundCurrent === true && !channel.name.includes(getSemester())) {
-              position = channel.position - 1;
-              break;
-            }
+        channels.sort((a, b) => a.position - b.position);
+        // channels now represents all the categories in the server, sorted by their position
+        let foundCurrent = false;
+        let position = -1;
+        for (const channel of channels) {
+          if (channel.name.includes(getSemester())) foundCurrent = true;
+          if (foundCurrent === true && !channel.name.includes(getSemester())) {
+            position = channel.position - 1;
+            break;
           }
-          if (position >= 0) await category.setPosition(position);
-          else await category.setPosition(300000);
-          if (serverRole) {
-            const permissions = await category.permissionsFor(serverRole).serialize();
-            await category.permissionOverwrites.delete(serverRole);
-            if (serverVeteranRole) await category.permissionOverwrites.create(serverVeteranRole, permissions);
-            const announcementsChannel = category.children.cache.find(elem => elem.name.startsWith('announcements'));
-            const meetingChannel = category.children.cache.find(elem => elem.name.startsWith('zoom'));
-            if (announcementsChannel) {
-              const restrictedPermissions = await announcementsChannel.permissionsFor(serverRole).serialize();
-              await announcementsChannel.permissionOverwrites.delete(serverRole);
-              if (serverVeteranRole) await announcementsChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
-            }
-            if (meetingChannel) {
-              const restrictedPermissions = await meetingChannel.permissionsFor(serverRole).serialize();
-              await meetingChannel.permissionOverwrites.delete(serverRole);
-              if (serverVeteranRole) await meetingChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+        }
+        if (position >= 0 && category) await category.setPosition(position);
+        else await category.setPosition(300000);
+        if (serverRole) {
+          const permissions = category.permissionsFor(serverRole).serialize();
+          const announcementsChannel = category.children.cache.find(elem => elem.name.startsWith('announcements'));
+          const meetingChannel = category.children.cache.find(elem => elem.name.startsWith('zoom'));
+          if (announcementsChannel) {
+            const restrictedPermissions = announcementsChannel.permissionsFor(serverRole).serialize();
+            await announcementsChannel.permissionOverwrites.delete(serverRole);
+            if (serverVeteranRole) await announcementsChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+          }
+          if (meetingChannel) {
+            const restrictedPermissions = meetingChannel.permissionsFor(serverRole).serialize();
+            await meetingChannel.permissionOverwrites.delete(serverRole);
+            if (serverVeteranRole) await meetingChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+          }
+          await category.permissionOverwrites.delete(serverRole);
+          if (serverVeteranRole) {
+            await category.permissionOverwrites.create(serverVeteranRole, permissions);
+            for (const channel of category.children.cache) {
+              console.log('YIPPEE3');
+              channel[1].permissionOverwrites.edit(serverVeteranRole, { ViewChannel: true });
+              console.log('YIPPEE4');
             }
           }
         }
-        // Category = current category
-        // ServerRole = Course Role
-        // ServerVeteranRole = Veteran Role
-        // Find students with current student role
-        const students: GuildMember[] = [];
-        for (const studentsArray of guild.members.cache.entries()) {
-          for (const possibleStudent of studentsArray) {
-            const student = possibleStudent as GuildMember;
-            if ((<GuildMember>student).roles !== undefined) students.push(student as GuildMember);
-          }
-        }
-        for (const student of students) {
-          if (serverRole && serverVeteranRole) {
-            await student.roles.remove(serverRole);
-            await student.roles.add(serverVeteranRole);
-          }
-        }
-        // Remove from prev semester list
-        const index = rolesList.indexOf(course);
-        rolesList = rolesList.splice(index, 1);
-        saveListToFile(rolesList, 'data/prevsemester.json');
       }
+      // Category = current category
+      // ServerRole = Course Role
+      // ServerVeteranRole = Veteran Role
+      // Find students with current student role
+      const students: GuildMember[] = [];
+      for (const studentsArray of guild.members.cache.entries()) {
+        for (const possibleStudent of studentsArray) {
+          const student = possibleStudent as GuildMember;
+          if ((<GuildMember>student).roles !== undefined) students.push(student as GuildMember);
+        }
+      }
+      for (const student of students) {
+        if (serverRole && serverVeteranRole) {
+          await student.roles.remove(serverRole);
+          await student.roles.add(serverVeteranRole);
+        }
+      }
+      // Remove from prev semester list
+      const index = rolesList.indexOf(course);
+      rolesList = rolesList.splice(index, 1);
+      saveListToFile(rolesList, 'data/prevsemester.json');
     }
   }
 }
