@@ -47,7 +47,6 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
             }
           }
         }
-
         channels.sort((a, b) => a.position - b.position);
         // channels now represents all the categories in the server, sorted by their position
         let foundCurrent = false;
@@ -69,17 +68,26 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
           if (announcementsChannel) {
             const restrictedPermissions = announcementsChannel.permissionsFor(serverRole).serialize();
             await announcementsChannel.permissionOverwrites.delete(serverRole);
-            if (serverVeteranRole) await announcementsChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+            if (serverVeteranRole) {
+              await announcementsChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+              await announcementsChannel.permissionOverwrites.create(serverVeteranRole, { SendMessages: false });
+            }
           }
           if (meetingChannel) {
             const restrictedPermissions = meetingChannel.permissionsFor(serverRole).serialize();
             await meetingChannel.permissionOverwrites.delete(serverRole);
-            if (serverVeteranRole) await meetingChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+            if (serverVeteranRole) {
+              await meetingChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+              await meetingChannel.permissionOverwrites.create(serverVeteranRole, { SendMessages: false });
+            }
           }
           if (videoChannel) {
             const restrictedPermissions = videoChannel.permissionsFor(serverRole).serialize();
             await videoChannel.permissionOverwrites.delete(serverRole);
-            if (serverVeteranRole) await videoChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+            if (serverVeteranRole) {
+              await videoChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+              await videoChannel.permissionOverwrites.create(serverVeteranRole, { SendMessages: false });
+            }
           }
           await category.permissionOverwrites.delete(serverRole);
           if (serverVeteranRole) {
@@ -97,17 +105,26 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
           if (announcementsChannel) {
             const restrictedPermissions = announcementsChannel.permissionsFor(serverJoint).serialize();
             await announcementsChannel.permissionOverwrites.delete(serverJoint);
-            if (jointVet) await announcementsChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+            if (jointVet) {
+              await announcementsChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+              await announcementsChannel.permissionOverwrites.create(jointVet, { SendMessages: false });
+            }
           }
           if (meetingChannel) {
             const restrictedPermissions = meetingChannel.permissionsFor(serverJoint).serialize();
             await meetingChannel.permissionOverwrites.delete(serverJoint);
-            if (jointVet) await meetingChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+            if (jointVet) {
+              await meetingChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+              await meetingChannel.permissionOverwrites.create(jointVet, { SendMessages: false });
+            }
           }
           if (videoChannel) {
             const restrictedPermissions = videoChannel.permissionsFor(serverJoint).serialize();
             await videoChannel.permissionOverwrites.delete(serverJoint);
-            if (jointVet) await videoChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+            if (jointVet) {
+              await videoChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+              await videoChannel.permissionOverwrites.create(jointVet, { SendMessages: false });
+            }
           }
           await category.permissionOverwrites.delete(serverJoint);
           if (jointVet) {

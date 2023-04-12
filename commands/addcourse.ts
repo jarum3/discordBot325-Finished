@@ -41,10 +41,7 @@ module.exports = {
     .setDefaultMemberPermissions(0)
     .setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction) {
-    if (!interaction.guild) {
-      await interaction.reply('This command is only valid in guilds.');
-      return;
-    }
+    if (!interaction.guild) return;
     await interaction.deferReply({ ephemeral: true });
     const prefix = interaction.options.getString('prefix');
     const number = interaction.options.getString('number');
@@ -59,7 +56,7 @@ module.exports = {
     for (const course of rolesList) {
       if (course.prefix === prefix && course.number === number) {
         // If our course is already in the list, just return an error message
-        interaction.reply({ content: 'A course with that name already exists.', ephemeral: true });
+        interaction.editReply({ content: 'A course with that name already exists.' });
         return;
       }
     }
