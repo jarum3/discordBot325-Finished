@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { Events, BaseInteraction, ChannelType } from 'discord.js';
-import { archiveCourse, checkCategory, createAndPopulateCategory, getListFromFile, saveListToFile } from '../helpers/functions';
+import { archiveCourse, checkCategory, createAndPopulateCategory, getListFromFile, getOtherJoint, refreshCourse, saveListToFile, writeCategory } from '../helpers/functions';
 import { CourseRole } from '../helpers/role';
 import * as fs from 'node:fs';
 
@@ -30,12 +30,24 @@ module.exports = {
         if (interaction.guild) await archiveCourse(course.name, interaction.guild);
       }
       saveListToFile([], 'data/prevsemester.json');
+      const scannedCourses: CourseRole[] = [];
       for (const course of newCourses) {
-        let category = await checkCategory(course);
-        if (!category) category = await createAndPopulateCategory(course, interaction.guild.channels);
-        if (category) {
-          const serverCategory = await interaction.guild.channels.fetch(category.id);
-          if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
+        if (scannedCourses.find(elem => elem.name === course.name)) continue;
+        const newCourse = refreshCourse(course);
+        if (newCourse) {
+          let category = await checkCategory(newCourse);
+          course.category = category;
+          if (!category) category = await createAndPopulateCategory(newCourse, interaction.guild.channels);
+          if (category) {
+            scannedCourses.push(course);
+            const joint = await getOtherJoint(newCourse);
+            if (joint) {
+              writeCategory(joint, category);
+              scannedCourses.push(joint);
+            }
+            const serverCategory = await interaction.guild.channels.fetch(category.id);
+            if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
+          }
         }
       }
       fs.writeFileSync('data/currentsemester.txt', '');

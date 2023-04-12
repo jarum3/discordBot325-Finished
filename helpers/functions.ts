@@ -159,6 +159,7 @@ export async function checkCategory(course: CourseRole): Promise<CategoryChannel
   const joint = await getOtherJoint(course);
   if (joint) {
     if (joint.category) {
+      writeCategory(course, joint.category);
       return joint.category;
     }
   }
@@ -318,6 +319,21 @@ export async function CourseSelectMenuFuture(customId: string, multi: boolean): 
   return row;
 }
 
+export function writeCategory(course: CourseRole, category: CategoryChannel) {
+  const futureRoles = getListFromFile('data/courses.json') as CourseRole[];
+  const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
+  if (futureRoles.includes(course)) {
+    const selected = futureRoles.indexOf(course);
+    futureRoles[selected].category = category;
+    saveListToFile(prevRoles, 'data/courses.json');
+  }
+  if (prevRoles.includes(course)) {
+    const selected = prevRoles.indexOf(course);
+    prevRoles[selected].category = category;
+    saveListToFile(prevRoles, 'data/prevsemester.json');
+  }
+}
+
 /**
  *
  * @param {import('discord.js').Guild} guild - Guild to create the role in
@@ -386,6 +402,16 @@ export function generateColor(): ColorResolvable {
   return '#' + color as ColorResolvable;
 }
 
+export function refreshCourse(course: CourseRole) {
+  const currRoles = getListFromFile('data/courses.json') as CourseRole[];
+  const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
+  const combinedRoles: CourseRole[] = [];
+  currRoles.forEach(elem => combinedRoles.push(elem));
+  prevRoles.forEach(elem => combinedRoles.push(elem));
+  const courseIndex = combinedRoles.findIndex(elem => elem.name === course.name);
+  if (courseIndex >= 0) return combinedRoles[courseIndex];
+}
+
 /**
  *
  * @param {import('../helpers/role'.CourseRole)} course - Course with data to structure channels based on
@@ -400,31 +426,31 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
     ? course.number + '-and-' + course.jointClass.split('-')[1]
     : course.number;
   if (!(await checkCategory(course))) {
-    const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
-    course.category = prevRoles.find(elem => elem.name === course.jointClass)?.category;
-    if (!course.category) course.category = prevRoles.find(elem => elem.jointClass === course.name)?.category;
-    if (!course.category) {
-      course.category = await createCategory(categoryName, channelManager, course.role);
-      const joint = await getOtherJoint(course);
-      if (joint) {
-        joint.category = course.category;
-        if (joint.role) {
-          const serverJoint = await channelManager.guild.roles.fetch(joint.role.id);
-          if (serverJoint) course.category?.permissionOverwrites.create(serverJoint, { ViewChannel: true });
-        }
-      }
-      createChannelInCat(course, 'announcements-' + courseNumber, true);
-      createChannelInCat(course, 'zoom-meeting-info-' + courseNumber, true);
-      if (course.video) {
-        const videoChannel = await createChannelInCat(course, 'how-to-make-a-video', true);
-        if (videoChannel) {
-          const messages = parseLines('data/videoMessages.txt');
-          messages.forEach(message => videoChannel.send(message));
-        }
-      }
-      createChannelInCat(course, 'introduce-yourself');
-      createChannelInCat(course, 'chat');
+    const category = await createCategory(categoryName, channelManager, course.role);
+    if (category) {
+      writeCategory(course, category);
+      course.category = category;
     }
+    const joint = await getOtherJoint(course);
+    if (joint) {
+      joint.category = course.category;
+      if (course.category) writeCategory(joint, course.category);
+      if (joint.role) {
+        const serverJoint = await channelManager.guild.roles.fetch(joint.role.id);
+        if (serverJoint) course.category?.permissionOverwrites.create(serverJoint, { ViewChannel: true });
+      }
+    }
+    createChannelInCat(course, 'announcements-' + courseNumber, true);
+    createChannelInCat(course, 'zoom-meeting-info-' + courseNumber, true);
+    if (course.video) {
+      const videoChannel = await createChannelInCat(course, 'how-to-make-a-video', true);
+      if (videoChannel) {
+        const messages = parseLines('data/videoMessages.txt');
+        messages.forEach(message => videoChannel.send(message));
+      }
+    }
+    createChannelInCat(course, 'introduce-yourself');
+    createChannelInCat(course, 'chat');
   }
   return course.category;
 }
