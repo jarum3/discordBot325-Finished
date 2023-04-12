@@ -37,11 +37,9 @@ module.exports = {
           const serverCategory = await interaction.guild.channels.fetch(category.id);
           if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
         }
-        const newPrevCourses = getListFromFile('data/prevsemester.json') as CourseRole[];
-        if (!(newPrevCourses.includes(course))) newPrevCourses.push(course);
-        saveListToFile(newPrevCourses, 'data/prevsemester.json');
       }
       fs.writeFileSync('data/currentsemester.txt', '');
+      saveListToFile(newCourses, 'data/prevsemester.json');
       saveListToFile([], 'data/courses.json');
       if (topCategory) await interaction.guild.channels.setPosition(topCategory, 0);
       await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });

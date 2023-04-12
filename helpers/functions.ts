@@ -447,8 +447,6 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
       }
       createChannelInCat(course, 'introduce-yourself');
       createChannelInCat(course, 'chat');
-      prevRoles.push(course);
-      saveListToFile(prevRoles, 'data/prevsemester.json');
     }
   }
   return course.category;
