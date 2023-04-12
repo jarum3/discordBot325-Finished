@@ -41,6 +41,7 @@ module.exports = {
           if (category) {
             scannedCourses.push(course);
             const joint = await getOtherJoint(newCourse);
+            writeCategory(newCourse, category);
             if (joint) {
               writeCategory(joint, category);
               scannedCourses.push(joint);
@@ -51,8 +52,8 @@ module.exports = {
         }
       }
       fs.writeFileSync('data/currentsemester.txt', '');
-      saveListToFile(newCourses, 'data/prevsemester.json');
-      saveListToFile([], 'data/courses.json');
+      fs.copyFileSync('data/courses.json', 'data/prevsemester.json');
+      fs.writeFileSync('data/courses.json', '[]');
       if (topCategory) await interaction.guild.channels.setPosition(topCategory, 0);
       await interaction.editReply({ content: 'Semester started!', components: [], embeds: [] });
       return;

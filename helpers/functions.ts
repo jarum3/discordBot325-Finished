@@ -20,7 +20,7 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
   const rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
   for (const course of rolesList) {
-    if (course.name != courseInput) continue;
+    if (course.name !== courseInput) continue;
     const courseRole = course.role;
     const veteranRole = course.veteranRole;
     const joint = await getOtherJoint(course);
@@ -65,6 +65,7 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
           const permissions = category.permissionsFor(serverRole).serialize();
           const announcementsChannel = category.children.cache.find(elem => elem.name.startsWith('announcements'));
           const meetingChannel = category.children.cache.find(elem => elem.name.startsWith('zoom'));
+          const videoChannel = category.children.cache.find(elem => elem.name.startsWith('how'));
           if (announcementsChannel) {
             const restrictedPermissions = announcementsChannel.permissionsFor(serverRole).serialize();
             await announcementsChannel.permissionOverwrites.delete(serverRole);
@@ -75,11 +76,16 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
             await meetingChannel.permissionOverwrites.delete(serverRole);
             if (serverVeteranRole) await meetingChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
           }
+          if (videoChannel) {
+            const restrictedPermissions = videoChannel.permissionsFor(serverRole).serialize();
+            await videoChannel.permissionOverwrites.delete(serverRole);
+            if (serverVeteranRole) await videoChannel.permissionOverwrites.create(serverVeteranRole, restrictedPermissions);
+          }
           await category.permissionOverwrites.delete(serverRole);
           if (serverVeteranRole) {
             await category.permissionOverwrites.create(serverVeteranRole, permissions);
             for (const channel of category.children.cache) {
-              channel[1].permissionOverwrites.edit(serverVeteranRole, { ViewChannel: true });
+              channel[1].permissionOverwrites.create(serverVeteranRole, { ViewChannel: true });
             }
           }
         }
@@ -87,6 +93,7 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
           const permissions = category.permissionsFor(serverJoint).serialize();
           const announcementsChannel = category.children.cache.find(elem => elem.name.startsWith('announcements'));
           const meetingChannel = category.children.cache.find(elem => elem.name.startsWith('zoom'));
+          const videoChannel = category.children.cache.find(elem => elem.name.startsWith('how'));
           if (announcementsChannel) {
             const restrictedPermissions = announcementsChannel.permissionsFor(serverJoint).serialize();
             await announcementsChannel.permissionOverwrites.delete(serverJoint);
@@ -97,11 +104,16 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
             await meetingChannel.permissionOverwrites.delete(serverJoint);
             if (jointVet) await meetingChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
           }
+          if (videoChannel) {
+            const restrictedPermissions = videoChannel.permissionsFor(serverJoint).serialize();
+            await videoChannel.permissionOverwrites.delete(serverJoint);
+            if (jointVet) await videoChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+          }
           await category.permissionOverwrites.delete(serverJoint);
           if (jointVet) {
             await category.permissionOverwrites.create(jointVet, permissions);
             for (const channel of category.children.cache) {
-              channel[1].permissionOverwrites.edit(jointVet, { ViewChannel: true });
+              channel[1].permissionOverwrites.create(jointVet, { ViewChannel: true });
             }
           }
         }
@@ -322,13 +334,13 @@ export async function CourseSelectMenuFuture(customId: string, multi: boolean): 
 export function writeCategory(course: CourseRole, category: CategoryChannel) {
   const futureRoles = getListFromFile('data/courses.json') as CourseRole[];
   const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
-  if (futureRoles.includes(course)) {
-    const selected = futureRoles.indexOf(course);
+  if (futureRoles.find(elem => elem.name === course.name)) {
+    const selected = futureRoles.findIndex(elem => elem.name === course.name);
     futureRoles[selected].category = category;
-    saveListToFile(prevRoles, 'data/courses.json');
+    saveListToFile(futureRoles, 'data/courses.json');
   }
-  if (prevRoles.includes(course)) {
-    const selected = prevRoles.indexOf(course);
+  if (prevRoles.find(elem => elem.name === course.name)) {
+    const selected = prevRoles.findIndex(elem => elem.name === course.name);
     prevRoles[selected].category = category;
     saveListToFile(prevRoles, 'data/prevsemester.json');
   }
