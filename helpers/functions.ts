@@ -17,14 +17,19 @@ export function getSemester(): string {
  * @param guild Guild that the course's roles and categories exist within
  */
 export async function archiveCourse(courseInput: string, guild: Guild) {
-  let rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
+  const rolesList = getListFromFile('data/prevsemester.json') as CourseRole[];
   // Assign roles in a loop, in case we want to make this a multi-select later.
   for (const course of rolesList) {
     if (course.name != courseInput) continue;
     const courseRole = course.role;
     const veteranRole = course.veteranRole;
+    const joint = await getOtherJoint(course);
     const serverRole = await guild.roles.fetch(courseRole.id);
+    let serverJoint;
+    if (joint && joint.role) serverJoint = await guild.roles.fetch(joint.role.id);
     const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
+    let jointVet;
+    if (joint && joint.veteranRole) jointVet = await guild.roles.fetch(joint.veteranRole.id);
     const possibleCategory = course.category;
     let category: CategoryChannel | undefined;
     if (possibleCategory) {
@@ -74,9 +79,29 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
           if (serverVeteranRole) {
             await category.permissionOverwrites.create(serverVeteranRole, permissions);
             for (const channel of category.children.cache) {
-              console.log('YIPPEE3');
               channel[1].permissionOverwrites.edit(serverVeteranRole, { ViewChannel: true });
-              console.log('YIPPEE4');
+            }
+          }
+        }
+        if (serverJoint) {
+          const permissions = category.permissionsFor(serverJoint).serialize();
+          const announcementsChannel = category.children.cache.find(elem => elem.name.startsWith('announcements'));
+          const meetingChannel = category.children.cache.find(elem => elem.name.startsWith('zoom'));
+          if (announcementsChannel) {
+            const restrictedPermissions = announcementsChannel.permissionsFor(serverJoint).serialize();
+            await announcementsChannel.permissionOverwrites.delete(serverJoint);
+            if (jointVet) await announcementsChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+          }
+          if (meetingChannel) {
+            const restrictedPermissions = meetingChannel.permissionsFor(serverJoint).serialize();
+            await meetingChannel.permissionOverwrites.delete(serverJoint);
+            if (jointVet) await meetingChannel.permissionOverwrites.create(jointVet, restrictedPermissions);
+          }
+          await category.permissionOverwrites.delete(serverJoint);
+          if (jointVet) {
+            await category.permissionOverwrites.create(jointVet, permissions);
+            for (const channel of category.children.cache) {
+              channel[1].permissionOverwrites.edit(jointVet, { ViewChannel: true });
             }
           }
         }
@@ -94,14 +119,32 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
       }
       for (const student of students) {
         if (serverRole && serverVeteranRole) {
-          await student.roles.remove(serverRole);
-          await student.roles.add(serverVeteranRole);
+          if (student.roles.cache.has(serverRole.id)) {
+            await student.roles.remove(serverRole);
+            await student.roles.add(serverVeteranRole);
+          }
         }
       }
       // Remove from prev semester list
-      const index = rolesList.indexOf(course);
-      rolesList = rolesList.splice(index, 1);
-      saveListToFile(rolesList, 'data/prevsemester.json');
+    }
+  }
+}
+
+/**
+ * Searches through both course lists looking for a matching joint course
+ * @param course Course that is known to have a joint class
+ * @returns Given course's joint course role
+ */
+export async function getOtherJoint(course: CourseRole): Promise<CourseRole | undefined> {
+  const rolesList = getListFromFile('data/courses.json') as CourseRole[];
+  const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
+  prevRoles.forEach(elem => rolesList.push(elem));
+  if (course) {
+    const jointChildObject = rolesList.find(element => element.jointClass === course.name);
+    if (jointChildObject) return jointChildObject;
+    if (course.jointClass) {
+      const jointParent = rolesList.find(element => element.name === course.jointClass);
+      if (jointParent) return jointParent;
     }
   }
 }
@@ -386,6 +429,13 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
     if (!course.category) course.category = prevRoles.find(elem => elem.jointClass === course.name)?.category;
     if (!course.category) {
       course.category = await createCategory(categoryName, channelManager, course.role);
+      const joint = await getOtherJoint(course);
+      if (joint) {
+        if (joint.role) {
+          const serverJoint = await channelManager.guild.roles.fetch(joint.role.id);
+          if (serverJoint) course.category?.permissionOverwrites.create(serverJoint, { ViewChannel: true });
+        }
+      }
       createChannelInCat(course, 'announcements-' + courseNumber, true);
       createChannelInCat(course, 'zoom-meeting-info-' + courseNumber, true);
       if (course.video) {
@@ -399,10 +449,6 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
       createChannelInCat(course, 'chat');
       prevRoles.push(course);
       saveListToFile(prevRoles, 'data/prevsemester.json');
-      const currRoles = getListFromFile('data/courses.json') as CourseRole[];
-      const remover = currRoles.indexOf(course);
-      currRoles.splice(remover, 1);
-      saveListToFile(currRoles, 'data/courses.json');
     }
   }
   return course.category;

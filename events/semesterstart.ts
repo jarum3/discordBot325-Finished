@@ -27,9 +27,7 @@ module.exports = {
     newCourses.forEach(elem => newCoursesNames.push(elem.name));
     if (interaction.guild) {
       for (const course of prevCourses) {
-        console.log('YIPPEE');
         if (interaction.guild) await archiveCourse(course.name, interaction.guild);
-        console.log('YIPPEE2');
       }
       saveListToFile([], 'data/prevsemester.json');
       for (const course of newCourses) {
@@ -39,6 +37,9 @@ module.exports = {
           const serverCategory = await interaction.guild.channels.fetch(category.id);
           if (serverCategory) await interaction.guild.channels.setPosition(serverCategory, 0);
         }
+        const newPrevCourses = getListFromFile('data/prevsemester.json') as CourseRole[];
+        if (!(newPrevCourses.includes(course))) newPrevCourses.push(course);
+        saveListToFile(newPrevCourses, 'data/prevsemester.json');
       }
       fs.writeFileSync('data/currentsemester.txt', '');
       saveListToFile([], 'data/courses.json');
