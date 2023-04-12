@@ -30,7 +30,7 @@ export async function archiveCourse(courseInput: string, guild: Guild) {
     const serverVeteranRole = await guild.roles.fetch(veteranRole.id);
     let jointVet;
     if (joint && joint.veteranRole) jointVet = await guild.roles.fetch(joint.veteranRole.id);
-    const possibleCategory = course.category;
+    const possibleCategory = await checkCategory(course);
     let category: CategoryChannel | undefined;
     if (possibleCategory) {
       const possibleCat = await guild.channels.cache.find(elem => elem.id === possibleCategory.id);
@@ -155,36 +155,12 @@ export async function getOtherJoint(course: CourseRole): Promise<CourseRole | un
  * @returns Category for the given course, if found
  */
 export async function checkCategory(course: CourseRole): Promise<CategoryChannel | undefined> {
-  const rolesList = getListFromFile('data/courses.json') as CourseRole[];
-  const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
-  let jointChild;
-  const selectedCourse = rolesList.indexOf(course);
-  const tempCourse = rolesList[selectedCourse];
-  if (tempCourse) {
-    let jointChildObject = rolesList.find(element => element.jointClass === tempCourse.name);
-    if (!jointChildObject) jointChildObject = prevRoles.find(element => element.jointClass === tempCourse.name);
-    if (jointChildObject) {
-      jointChild = rolesList.indexOf(jointChildObject);
-      if (!jointChild) jointChild = prevRoles.indexOf(jointChildObject);
+  if (course.category) return course.category;
+  const joint = await getOtherJoint(course);
+  if (joint) {
+    if (joint.category) {
+      return joint.category;
     }
-    let jointParent: CourseRole | undefined;
-    if (tempCourse.jointClass) {
-      jointParent = rolesList.find(element => element.name === tempCourse.jointClass);
-      if (!jointParent) jointParent = prevRoles.find(element => element.name === tempCourse.jointClass);
-    }
-    if (jointChildObject) {
-      if (jointChildObject.category) {
-        rolesList[selectedCourse].category = jointChildObject.category;
-      }
-    }
-    if (jointParent) {
-      rolesList[selectedCourse].jointClass = jointParent.name;
-      if (jointParent.category) {
-        rolesList[selectedCourse].category = jointParent.category;
-      }
-    }
-    saveListToFile(rolesList, 'data/courses.json');
-    return rolesList[selectedCourse].category;
   }
 }
 
@@ -423,7 +399,7 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
   const courseNumber: string = course.jointClass
     ? course.number + '-and-' + course.jointClass.split('-')[1]
     : course.number;
-  if (!course.category) {
+  if (!(await checkCategory(course))) {
     const prevRoles = getListFromFile('data/prevsemester.json') as CourseRole[];
     course.category = prevRoles.find(elem => elem.name === course.jointClass)?.category;
     if (!course.category) course.category = prevRoles.find(elem => elem.jointClass === course.name)?.category;
@@ -431,6 +407,7 @@ export async function createAndPopulateCategory(course: CourseRole, channelManag
       course.category = await createCategory(categoryName, channelManager, course.role);
       const joint = await getOtherJoint(course);
       if (joint) {
+        joint.category = course.category;
         if (joint.role) {
           const serverJoint = await channelManager.guild.roles.fetch(joint.role.id);
           if (serverJoint) course.category?.permissionOverwrites.create(serverJoint, { ViewChannel: true });
